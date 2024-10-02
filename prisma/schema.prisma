@@ -10,6 +10,19 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model ProductTemplate {
+  id              String @id @default(uuid()) @map("_id")
+  ean             String
+  name            String
+  expiration_time Int
+
+  categoryId String
+  unitId     String
+
+  category Category @relation(fields: [categoryId], references: [id])
+  unit     Unit     @relation(fields: [unitId], references: [id])
+}
+
 model Product {
   id              String   @id @default(uuid()) @map("_id")
   name            String
@@ -29,15 +42,17 @@ model Product {
 }
 
 model Category {
-  id       String    @id @default(uuid()) @map("_id")
-  name     String
-  products Product[]
+  id               String            @id @default(uuid()) @map("_id")
+  name             String
+  products         Product[]
+  productTemplates ProductTemplate[]
 }
 
 model Unit {
-  id       String    @id @default(uuid()) @map("_id")
-  name     String
-  products Product[]
+  id               String            @id @default(uuid()) @map("_id")
+  name             String
+  products         Product[]
+  productTemplates ProductTemplate[]
 }
 
 model Storage {
