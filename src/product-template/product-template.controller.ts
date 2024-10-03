@@ -8,7 +8,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { ProductTemplateService } from './product-template.service';
-import { ProductTemplate } from '@prisma/client';
+import { ProductTemplate } from 'shelfmate-typings-package';
 
 interface Response<T> {
   message: string;

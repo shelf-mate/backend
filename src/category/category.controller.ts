@@ -8,7 +8,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { Category } from '@prisma/client';
+import { Category } from 'shelfmate-typings-package';
 
 interface Response<T> {
   message: string;
