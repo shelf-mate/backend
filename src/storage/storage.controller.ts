@@ -8,7 +8,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import { Storage } from '@prisma/client';
+import { Storage } from 'shelfmate-typings-package';
 
 interface Response<T> {
   message: string;
