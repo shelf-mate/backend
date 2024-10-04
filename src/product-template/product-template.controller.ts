@@ -102,7 +102,7 @@ export class ProductTemplateController {
             ? undefined
             : moment(prod.expiration_date);
           const addedDate = moment(prod.entry_dates_tags[0]);
-          const expiration_time = expirationDate
+          const expirationTime = expirationDate
             ? expirationDate.diff(addedDate, 'days')
             : undefined;
           const name =
@@ -111,7 +111,7 @@ export class ProductTemplateController {
             {
               name,
               ean: data.product.code,
-              expiration_time,
+              expirationTime,
             },
             categoryId,
             undefined,
