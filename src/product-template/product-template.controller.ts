@@ -12,7 +12,6 @@ import { ProductTemplate } from '@prisma/client';
 import axios from 'axios';
 import { CategoryService } from 'src/category/category.service';
 import * as moment from 'moment';
-
 interface Response<T> {
   message: string;
   data: T;
