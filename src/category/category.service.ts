@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 
 @Injectable()
 export class CategoryService {
@@ -24,5 +24,9 @@ export class CategoryService {
 
   async deleteCategory(id: string) {
     return this.prisma.category.delete({ where: { id } });
+  }
+
+  async findCategoryByName(name: string): Promise<Category | null> {
+    return this.prisma.category.findFirst({ where: { name } });
   }
 }
