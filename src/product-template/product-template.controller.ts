@@ -13,7 +13,6 @@ import axios from 'axios';
 import { CategoryService } from 'src/category/category.service';
 import * as moment from 'moment';
 
-
 interface Response<T> {
   message: string;
   data: T;
@@ -103,7 +102,8 @@ export class ProductTemplateController {
             ? undefined
             : moment(prod.expiration_date);
           const addedDate = moment(prod.entry_dates_tags[0]);
-          const expiration_time = expirationDate
+          const expirationTime = expirationDate
+
             ? expirationDate.diff(addedDate, 'days')
             : undefined;
           const name =
@@ -112,7 +112,8 @@ export class ProductTemplateController {
             {
               name,
               ean: data.product.code,
-              expiration_time,
+              expirationTime,
+
             },
             categoryId,
             undefined,

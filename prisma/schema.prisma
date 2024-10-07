@@ -11,10 +11,13 @@ generator client {
 }
 
 model ProductTemplate {
-  id              String  @id @default(uuid()) @map("_id")
-  ean             String  @unique
-  name            String?
-  expiration_time Int?
+  id             String  @id @default(uuid()) @map("_id")
+  ean            String?
+  name           String?
+  expirationTime Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   categoryId String?
   unitId     String?
@@ -24,13 +27,16 @@ model ProductTemplate {
 }
 
 model Product {
-  id              String   @id @default(uuid()) @map("_id")
-  name            String
-  type            String
-  quantity        Int
-  ean             String?
-  expiration_date DateTime
-  description     String?
+  id             String   @id @default(uuid()) @map("_id")
+  name           String
+  type           String?
+  quantity       Int
+  ean            String?
+  expirationDate DateTime
+  description    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   categoryId String
   unitId     String
@@ -42,21 +48,33 @@ model Product {
 }
 
 model Category {
-  id               String            @id @default(uuid()) @map("_id")
-  name             String
-  products         Product[]
+  id       String    @id @default(uuid()) @map("_id")
+  name     String
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   productTemplates ProductTemplate[]
 }
 
 model Unit {
-  id               String            @id @default(uuid()) @map("_id")
-  name             String
+  id   String @id @default(uuid()) @map("_id")
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   products         Product[]
   productTemplates ProductTemplate[]
 }
 
 model Storage {
-  id       String    @id @default(uuid()) @map("_id")
-  name     String
+  id   String @id @default(uuid()) @map("_id")
+  name String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   products Product[]
 }
