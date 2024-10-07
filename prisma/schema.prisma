@@ -11,16 +11,16 @@ generator client {
 }
 
 model ProductTemplate {
-  id              String @id @default(uuid()) @map("_id")
-  ean             String
-  name            String
-  expiration_time Int
+  id              String  @id @default(uuid()) @map("_id")
+  ean             String  @unique
+  name            String?
+  expiration_time Int?
 
-  categoryId String
-  unitId     String
+  categoryId String?
+  unitId     String?
 
-  category Category @relation(fields: [categoryId], references: [id])
-  unit     Unit     @relation(fields: [unitId], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
+  unit     Unit?     @relation(fields: [unitId], references: [id])
 }
 
 model Product {

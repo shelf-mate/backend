@@ -6,6 +6,10 @@ import { Prisma } from '@prisma/client';
 export class ProductTemplateService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async deleteAllProductTemplates() {
+    return this.prisma.productTemplate.deleteMany();
+  }
+
   async getAllProductTemplates() {
     return this.prisma.productTemplate.findMany();
   }
@@ -14,17 +18,31 @@ export class ProductTemplateService {
     return this.prisma.productTemplate.findUnique({ where: { id } });
   }
 
-  async getProductTemplateByEan(ean: string) {
-    return this.prisma.productTemplate.findFirst({ where: { ean } });
+  async getProductTemplateByEan(
+    ean: string,
+    include: { category: boolean; unit: boolean } = {
+      category: true,
+      unit: true,
+    },
+  ) {
+    return this.prisma.productTemplate.findFirst({
+      where: { ean },
+      include,
+    });
   }
 
   async createProductTemplate(
     data: Omit<Prisma.ProductTemplateCreateInput, 'category' | 'unit'>,
-    unitId: string,
-    categoryId: string,
+    categoryId?: string,
+    unitId?: string,
+    include: { category: boolean; unit: boolean } | undefined = {
+      category: true,
+      unit: true,
+    },
   ) {
     return this.prisma.productTemplate.create({
       data: { ...data, categoryId, unitId },
+      include: include,
     });
   }
 

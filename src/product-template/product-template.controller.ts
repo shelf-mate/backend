@@ -8,7 +8,11 @@ import {
   Body,
 } from '@nestjs/common';
 import { ProductTemplateService } from './product-template.service';
-import { ProductTemplate } from 'shelfmate-typings-package';
+import { ProductTemplate } from '@prisma/client';
+import axios from 'axios';
+import { CategoryService } from 'src/category/category.service';
+import * as moment from 'moment';
+
 
 interface Response<T> {
   message: string;
@@ -19,7 +23,17 @@ interface Response<T> {
 export class ProductTemplateController {
   constructor(
     private readonly productTemplateService: ProductTemplateService,
+    private readonly categoryService: CategoryService,
   ) {}
+
+  @Get('nuke')
+  async nuke(): Promise<Response<string>> {
+    await this.productTemplateService.deleteAllProductTemplates();
+    return {
+      message: 'Nuked all productTemplates',
+      data: 'Nuked all productTemplates',
+    };
+  }
 
   // GET all productTemplates
   @Get()
@@ -52,7 +66,7 @@ export class ProductTemplateController {
     }
   }
 
-  // GET a productTemplate by ID
+  // GET a productTemplate by EAN, will create the productTemplate if it doesn't exist and incidate that it might be new
   @Get('/by-ean/:ean')
   async getProductTemplateByEan(
     @Param('ean') ean: string,
@@ -60,16 +74,83 @@ export class ProductTemplateController {
     try {
       const productTemplate =
         await this.productTemplateService.getProductTemplateByEan(ean);
+      if (!productTemplate) {
+        try {
+          const { data } = await axios.get(
+            'https://world.openfoodfacts.org/api/v2/product/' + ean,
+            {
+              headers: {
+                'User-Agent': 'ShelfMate - Web - V0 - github.com/shelf-mate',
+              },
+            },
+          );
+          const prod = data.product;
+          const states = prod.states;
+          const categoryName = states.includes('en:categories-to-be-completed')
+            ? undefined
+            : prod.categories.split(',')[0];
+          let categoryId = (
+            await this.categoryService.findCategoryByName(categoryName)
+          )?.id;
+          if (!categoryId && categoryName) {
+            categoryId = (
+              await this.categoryService.createCategory({ name: categoryName })
+            ).id;
+          }
+          const expirationDate = states.includes(
+            'en:expiration-date-to-be-completed',
+          )
+            ? undefined
+            : moment(prod.expiration_date);
+          const addedDate = moment(prod.entry_dates_tags[0]);
+          const expiration_time = expirationDate
+            ? expirationDate.diff(addedDate, 'days')
+            : undefined;
+          const name =
+            prod.product_name ?? prod.product_name_en ?? prod.product_name_fr;
+          const res = await this.productTemplateService.createProductTemplate(
+            {
+              name,
+              ean: data.product.code,
+              expiration_time,
+            },
+            categoryId,
+            undefined,
+            { category: true, unit: false },
+          );
+          return {
+            message: 'Created new productTemplate based on openfoodfacts data',
+            data: res,
+            new: true,
+          };
+        } catch (e) {
+          if (e.response.status === 404) {
+            const res = await this.productTemplateService.createProductTemplate(
+              {
+                ean,
+              },
+            );
+            return {
+              message:
+                'Product not found on openfoodfacts created new empty productTemplate',
+              data: res,
+              new: true,
+            };
+          }
+        }
+        new Error('Error retrieving product from openfoodfacts');
+      }
       return {
         message: 'Successfully retrieved productTemplate',
         data: productTemplate,
         new: false,
       };
-    } catch {
+    } catch (e) {
+      console.error(e);
       return {
-        message: 'ProductTemplate not found',
-        data: null,
-        new: true,
+        message: 'Error retrieving productTemplate',
+        data: undefined,
+        new: false,
       };
     }
   }
@@ -96,7 +177,7 @@ export class ProductTemplateController {
   @Patch(':id')
   async updateProductTemplate(
     @Param('id') id: string,
-    @Body() productTemplateData: Omit<ProductTemplate, 'id'>,
+    @Body() productTemplateData: Partial<Omit<ProductTemplate, 'id'>>,
   ): Promise<Response<ProductTemplate>> {
     try {
       const productTemplate =
