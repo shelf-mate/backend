@@ -10,8 +10,11 @@ export class CategoryService {
     return this.prisma.category.findMany();
   }
 
-  async getCategoryById(id: string) {
-    return this.prisma.category.findUnique({ where: { id } });
+  async getCategoryById(
+    id: string,
+    include: { products: boolean } = { products: false },
+  ) {
+    return this.prisma.category.findUnique({ where: { id }, include });
   }
 
   async createCategory(data: Prisma.CategoryCreateInput) {

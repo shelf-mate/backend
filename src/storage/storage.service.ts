@@ -10,8 +10,11 @@ export class StorageService {
     return this.prisma.storage.findMany();
   }
 
-  async getStorageById(id: string) {
-    return this.prisma.storage.findUnique({ where: { id } });
+  async getStorageById(
+    id: string,
+    include: { products: boolean } = { products: false },
+  ) {
+    return this.prisma.storage.findUnique({ where: { id }, include });
   }
 
   async createStorage(data: Prisma.StorageCreateInput) {

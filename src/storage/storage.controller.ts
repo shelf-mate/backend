@@ -8,7 +8,8 @@ import {
   Body,
 } from '@nestjs/common';
 import { StorageService } from './storage.service';
-import { Storage } from 'shelfmate-typings-package';
+import { Product, Storage } from '@prisma/client';
+import { ProductService } from 'src/product/product.service';
 
 interface Response<T> {
   message: string;
@@ -17,7 +18,10 @@ interface Response<T> {
 
 @Controller('storages')
 export class StorageController {
-  constructor(private readonly storageService: StorageService) {}
+  constructor(
+    private readonly storageService: StorageService,
+    private readonly productsService: ProductService,
+  ) {}
 
   // GET all storages
   @Get()
@@ -39,6 +43,27 @@ export class StorageController {
       return {
         message: 'Successfully retrieved storage',
         data: storage,
+      };
+    } catch {
+      return {
+        message: 'Storage not found',
+        data: null,
+      };
+    }
+  }
+
+  @Get(':id/products/')
+  async getProductsInStorage(
+    @Param('id') id: string,
+  ): Promise<Response<Product[]>> {
+    try {
+      const storage = await this.storageService.getStorageById(id, {
+        products: true,
+      });
+      return {
+        message:
+          'Successfully retrieved al products in storage ' + storage.name + '.',
+        data: storage.products,
       };
     } catch {
       return {

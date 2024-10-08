@@ -8,7 +8,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
-import { Category } from 'shelfmate-typings-package';
+import { Category, Product } from '@prisma/client';
 
 interface Response<T> {
   message: string;
@@ -43,6 +43,29 @@ export class CategoryController {
     } catch {
       return {
         message: 'Category not found',
+        data: null,
+      };
+    }
+  }
+
+  @Get(':id/products/')
+  async getProductsInStorage(
+    @Param('id') id: string,
+  ): Promise<Response<Product[]>> {
+    try {
+      const category = await this.categoryService.getCategoryById(id, {
+        products: true,
+      });
+      return {
+        message:
+          'Successfully retrieved al products in category ' +
+          category.name +
+          '-.',
+        data: category.products,
+      };
+    } catch {
+      return {
+        message: 'Storage not found',
         data: null,
       };
     }
