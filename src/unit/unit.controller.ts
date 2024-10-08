@@ -8,7 +8,7 @@ import {
   Body,
 } from '@nestjs/common';
 import { UnitService } from './unit.service';
-import { Unit } from 'shelfmate-typings-package';
+import { Unit } from '@prisma/client';
 
 interface Response<T> {
   message: string;
