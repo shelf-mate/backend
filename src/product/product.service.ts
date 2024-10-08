@@ -21,7 +21,12 @@ export class ProductService {
     storageId: string,
   ) {
     return this.prisma.product.create({
-      data: { ...data, categoryId, unitId, storageId },
+      data: {
+        ...data,
+        category: { connect: { id: categoryId } },
+        storage: { connect: { id: storageId } },
+        unit: { connect: { id: unitId } },
+      },
     });
   }
 
