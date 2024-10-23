@@ -19,6 +19,11 @@ export class ProductService {
     unitId: string,
     categoryId: string,
     storageId: string,
+    include: { category: boolean; storage: boolean; unit: boolean } = {
+      category: true,
+      storage: true,
+      unit: true,
+    },
   ) {
     return this.prisma.product.create({
       data: {
@@ -27,6 +32,7 @@ export class ProductService {
         storage: { connect: { id: storageId } },
         unit: { connect: { id: unitId } },
       },
+      include,
     });
   }
 
