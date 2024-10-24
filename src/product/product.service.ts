@@ -7,11 +7,24 @@ export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllProducts() {
-    return this.prisma.product.findMany();
+    return this.prisma.product.findMany({
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+    });
   }
 
   async getProductById(id: string) {
-    return this.prisma.product.findUnique({ where: { id } });
+    return this.prisma.product.findUnique({
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+      where: { id },
+    });
   }
 
   async createProduct(
