@@ -44,10 +44,25 @@ export class ProductService {
   }
 
   async updateProduct(id: string, data: Prisma.ProductUpdateInput) {
-    return this.prisma.product.update({ where: { id }, data });
+    return this.prisma.product.update({
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+      where: { id },
+      data,
+    });
   }
 
   async deleteProduct(id: string) {
-    return this.prisma.product.delete({ where: { id } });
+    return this.prisma.product.delete({
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+      where: { id },
+    });
   }
 }
