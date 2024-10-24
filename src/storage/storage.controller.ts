@@ -57,13 +57,10 @@ export class StorageController {
     @Param('id') id: string,
   ): Promise<Response<Product[]>> {
     try {
-      const storage = await this.storageService.getStorageById(id, {
-        products: true,
-      });
+      const products = await this.storageService.getProductsInStorage(id);
       return {
-        message:
-          'Successfully retrieved al products in storage ' + storage.name + '.',
-        data: storage.products,
+        message: 'Successfully retrieved products in storage',
+        data: products,
       };
     } catch {
       return {
@@ -72,7 +69,6 @@ export class StorageController {
       };
     }
   }
-
   // POST: Create a new storage using Prisma types
   @Post()
   async createStorage(
