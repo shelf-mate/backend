@@ -6,6 +6,7 @@ import {
   Delete,
   Param,
   Body,
+  NotFoundException,
 } from '@nestjs/common';
 import { ProductTemplateService } from './product-template.service';
 import { ProductTemplate } from '@prisma/client';
@@ -50,19 +51,15 @@ export class ProductTemplateController {
   async getProductTemplateById(
     @Param('id') id: string,
   ): Promise<Response<ProductTemplate | null>> {
-    try {
-      const productTemplate =
-        await this.productTemplateService.getProductTemplateById(id);
-      return {
-        message: 'Successfully retrieved productTemplate',
-        data: productTemplate,
-      };
-    } catch {
-      return {
-        message: 'ProductTemplate not found',
-        data: null,
-      };
+    if (!(await this.productTemplateService.checkProductTemplateExists(id))) {
+      throw new NotFoundException(`Product-Template with ID ${id} not found`);
     }
+    const productTemplate =
+      await this.productTemplateService.getProductTemplateById(id);
+    return {
+      message: `Successfully retrieved productTemplate ${productTemplate.name}`,
+      data: productTemplate,
+    };
   }
 
   // GET a productTemplate by EAN, will create the productTemplate if it doesn't exist and incidate that it might be new
@@ -167,7 +164,7 @@ export class ProductTemplateController {
         categoryId,
       );
     return {
-      message: 'ProductTemplate successfully added',
+      message: `ProductTemplate ${productTemplate.name} successfully added`,
       data: productTemplate,
     };
   }
@@ -178,22 +175,18 @@ export class ProductTemplateController {
     @Param('id') id: string,
     @Body() productTemplateData: Partial<Omit<ProductTemplate, 'id'>>,
   ): Promise<Response<ProductTemplate>> {
-    try {
-      const productTemplate =
-        await this.productTemplateService.updateProductTemplate(
-          id,
-          productTemplateData,
-        );
-      return {
-        message: 'ProductTemplate successfully updated',
-        data: productTemplate,
-      };
-    } catch {
-      return {
-        message: 'ProductTemplate not found',
-        data: undefined,
-      };
+    if (!(await this.productTemplateService.checkProductTemplateExists(id))) {
+      throw new NotFoundException(`Product-Template with ID ${id} not found`);
     }
+    const productTemplate =
+      await this.productTemplateService.updateProductTemplate(
+        id,
+        productTemplateData,
+      );
+    return {
+      message: `ProductTemplate ${productTemplate.name} successfully updated`,
+      data: productTemplate,
+    };
   }
 
   // DELETE: Delete a productTemplate by ID
@@ -201,10 +194,13 @@ export class ProductTemplateController {
   async deleteProductTemplate(
     @Param('id') id: string,
   ): Promise<Response<ProductTemplate>> {
+    if (!(await this.productTemplateService.checkProductTemplateExists(id))) {
+      throw new NotFoundException(`Product-Template with ID ${id} not found`);
+    }
     const productTemplate =
       await this.productTemplateService.deleteProductTemplate(id);
     return {
-      message: 'ProductTemplate successfully deleted',
+      message: `ProductTemplate ${productTemplate.name} successfully deleted`,
       data: productTemplate,
     };
   }

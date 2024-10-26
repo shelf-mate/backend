@@ -28,4 +28,11 @@ export class StorageService {
   async deleteStorage(id: string) {
     return this.prisma.storage.delete({ where: { id } });
   }
+
+  async checkStorageExists(id: string): Promise<boolean> {
+    const storage = await this.prisma.storage.findUnique({
+      where: { id },
+    });
+    return !!storage;
+  }
 }

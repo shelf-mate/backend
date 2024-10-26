@@ -25,4 +25,11 @@ export class UnitService {
   async deleteUnit(id: string) {
     return this.prisma.unit.delete({ where: { id } });
   }
+
+  async checkUnitExists(id: string): Promise<boolean> {
+    const unit = await this.prisma.unit.findUnique({
+      where: { id },
+    });
+    return !!unit;
+  }
 }

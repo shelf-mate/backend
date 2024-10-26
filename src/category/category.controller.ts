@@ -6,6 +6,8 @@ import {
   Delete,
   Param,
   Body,
+  NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Category, Product } from '@prisma/client';
@@ -34,41 +36,32 @@ export class CategoryController {
   async getCategoryById(
     @Param('id') id: string,
   ): Promise<Response<Category | null>> {
-    try {
-      const category = await this.categoryService.getCategoryById(id);
-      return {
-        message: 'Successfully retrieved category',
-        data: category,
-      };
-    } catch {
-      return {
-        message: 'Category not found',
-        data: null,
-      };
+    if (!(await this.categoryService.checkCategoryExists(id))) {
+      throw new NotFoundException(`Unit with ID ${id} not found`);
+    } else if (!id) {
+      throw new BadRequestException(`Invalid category ID`);
     }
+    const category = await this.categoryService.getCategoryById(id);
+    return {
+      message: `Successfully retrieved category ${category.name}`,
+      data: category,
+    };
   }
 
   @Get(':id/products/')
   async getProductsInStorage(
     @Param('id') id: string,
   ): Promise<Response<Product[]>> {
-    try {
-      const category = await this.categoryService.getCategoryById(id, {
-        products: true,
-      });
-      return {
-        message:
-          'Successfully retrieved al products in category ' +
-          category.name +
-          '-.',
-        data: category.products,
-      };
-    } catch {
-      return {
-        message: 'Storage not found',
-        data: null,
-      };
+    const category = await this.categoryService.getCategoryById(id, {
+      products: true,
+    });
+    if (!(await this.categoryService.checkCategoryExists(id))) {
+      throw new NotFoundException(`Category with ${id} not found`);
     }
+    return {
+      message: `Successfully retrieved al products in category ${category.name}`,
+      data: category.products,
+    };
   }
 
   // POST: Create a new category using Prisma types
@@ -78,7 +71,7 @@ export class CategoryController {
   ): Promise<Response<Category>> {
     const category = await this.categoryService.createCategory(categoryData);
     return {
-      message: 'Category successfully added',
+      message: `Category ${category.name} successfully added`,
       data: category,
     };
   }
@@ -89,29 +82,28 @@ export class CategoryController {
     @Param('id') id: string,
     @Body() categoryData: Omit<Category, 'id'>,
   ): Promise<Response<Category>> {
-    try {
-      const category = await this.categoryService.updateCategory(
-        id,
-        categoryData,
-      );
-      return {
-        message: 'Category successfully updated',
-        data: category,
-      };
-    } catch {
-      return {
-        message: 'Category not found',
-        data: undefined,
-      };
+    if (!(await this.categoryService.checkCategoryExists(id))) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
     }
+    const category = await this.categoryService.updateCategory(
+      id,
+      categoryData,
+    );
+    return {
+      message: `Category ${category.name} successfully updated`,
+      data: category,
+    };
   }
 
   // DELETE: Delete a category by ID
   @Delete(':id')
   async deleteCategory(@Param('id') id: string): Promise<Response<Category>> {
+    if (!(await this.categoryService.checkCategoryExists(id))) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
     const category = await this.categoryService.deleteCategory(id);
     return {
-      message: 'Category successfully deleted',
+      message: `Category ${category.name} successfully deleted`,
       data: category,
     };
   }

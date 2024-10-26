@@ -56,4 +56,11 @@ export class ProductTemplateService {
   async deleteProductTemplate(id: string) {
     return this.prisma.productTemplate.delete({ where: { id } });
   }
+
+  async checkProductTemplateExists(id: string): Promise<boolean> {
+    const productTemplate = await this.prisma.productTemplate.findUnique({
+      where: { id },
+    });
+    return !!productTemplate;
+  }
 }
