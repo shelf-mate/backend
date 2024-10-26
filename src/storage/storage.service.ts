@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, Product } from '@prisma/client';
 
 @Injectable()
 export class StorageService {
@@ -15,6 +15,17 @@ export class StorageService {
     include: { products: boolean } = { products: false },
   ) {
     return this.prisma.storage.findUnique({ where: { id }, include });
+  }
+
+  async getProductsInStorage(storageId: string): Promise<Product[]> {
+    return this.prisma.product.findMany({
+      where: { storageId },
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+    });
   }
 
   async createStorage(data: Prisma.StorageCreateInput) {

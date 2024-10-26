@@ -7,11 +7,24 @@ export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllProducts() {
-    return this.prisma.product.findMany();
+    return this.prisma.product.findMany({
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+    });
   }
 
   async getProductById(id: string) {
-    return this.prisma.product.findUnique({ where: { id } });
+    return this.prisma.product.findUnique({
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+      where: { id },
+    });
   }
 
   async createProduct(
@@ -37,10 +50,25 @@ export class ProductService {
   }
 
   async updateProduct(id: string, data: Prisma.ProductUpdateInput) {
-    return this.prisma.product.update({ where: { id }, data });
+    return this.prisma.product.update({
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+      where: { id },
+      data,
+    });
   }
 
   async deleteProduct(id: string) {
-    return this.prisma.product.delete({ where: { id } });
+    return this.prisma.product.delete({
+      include: {
+        category: true,
+        unit: true,
+        storage: true,
+      },
+      where: { id },
+    });
   }
 }
