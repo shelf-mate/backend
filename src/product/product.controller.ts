@@ -6,11 +6,10 @@ import {
   Delete,
   Param,
   Body,
-  NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { Product } from '@prisma/client';
+import { handlePrismaError } from "../utilities.service";
 
 interface Response<T> {
   message: string;
@@ -24,11 +23,16 @@ export class ProductController {
   // GET all products
   @Get()
   async getAllProducts(): Promise<Response<Product[]>> {
-    const products = await this.productService.getAllProducts();
-    return {
-      message: 'Successfully retrieved all products',
-      data: products,
-    };
+    try{
+      const products = await this.productService.getAllProducts();
+      return {
+        message: 'Successfully retrieved all products',
+        data: products,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
+
   }
 
   // GET a product by ID
@@ -36,14 +40,15 @@ export class ProductController {
   async getProductById(
     @Param('id') id: string,
   ): Promise<Response<Product | null>> {
-    if (!(await this.productService.checkProductExists(id))) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
+    try{
+      const product = await this.productService.getProductById(id);
+      return {
+        message: `Successfully retrieved product ${product.name}`,
+        data: product,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const product = await this.productService.getProductById(id);
-    return {
-      message: `Successfully retrieved product ${product.name}`,
-      data: product,
-    };
   }
 
   // POST: Create a new product using Prisma types
@@ -51,8 +56,8 @@ export class ProductController {
   async createProduct(
     @Body() productData: Omit<Product, 'id'>,
   ): Promise<Response<Product>> {
-    const { categoryId, unitId, storageId, ...rest } = productData;
-    try {
+    try{
+      const { categoryId, unitId, storageId, ...rest } = productData;
       const product = await this.productService.createProduct(
         rest,
         unitId,
@@ -63,8 +68,8 @@ export class ProductController {
         message: `Product ${product.name} successfully added`,
         data: product,
       };
-    } catch {
-      throw new BadRequestException('Error creating product');
+    } catch (error) {
+      handlePrismaError(error);
     }
   }
 
@@ -74,26 +79,28 @@ export class ProductController {
     @Param('id') id: string,
     @Body() productData: Omit<Product, 'id'>,
   ): Promise<Response<Product>> {
-    if (!(await this.productService.checkProductExists(id))) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
+    try{
+      const product = await this.productService.updateProduct(id, productData);
+      return {
+        message: `Product ${product.name} successfully updated`,
+        data: product,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const product = await this.productService.updateProduct(id, productData);
-    return {
-      message: `Product ${product.name} successfully updated`,
-      data: product,
-    };
   }
 
   // DELETE: Delete a product by ID
   @Delete(':id')
   async deleteProduct(@Param('id') id: string): Promise<Response<Product>> {
-    if (!(await this.productService.checkProductExists(id))) {
-      throw new NotFoundException(`Product with ID ${id} not found`);
+    try{
+      const product = await this.productService.deleteProduct(id);
+      return {
+        message: `Product ${product.name} successfully deleted`,
+        data: product,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const product = await this.productService.deleteProduct(id);
-    return {
-      message: `Product ${product.name} successfully deleted`,
-      data: product,
-    };
   }
 }

@@ -6,11 +6,10 @@ import {
   Delete,
   Param,
   Body,
-  NotFoundException,
-  BadRequestException,
 } from '@nestjs/common';
 import { UnitService } from './unit.service';
 import { Unit } from '@prisma/client';
+import { handlePrismaError } from "../utilities.service";
 
 interface Response<T> {
   message: string;
@@ -24,24 +23,29 @@ export class UnitController {
   // GET all units
   @Get()
   async getAllUnits(): Promise<Response<Unit[]>> {
-    const units = await this.unitService.getAllUnits();
-    return {
-      message: 'Successfully retrieved all units',
-      data: units,
-    };
+    try{
+      const units = await this.unitService.getAllUnits();
+      return {
+        message: 'Successfully retrieved all units',
+        data: units,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
   }
 
   // GET a unit by ID
   @Get(':id')
   async getUnitById(@Param('id') id: string): Promise<Response<Unit | null>> {
-    if (!(await this.unitService.checkUnitExists(id))) {
-      throw new NotFoundException(`Unit with ID ${id} not found`);
+    try{
+      const unit = await this.unitService.getUnitById(id);
+      return {
+        message: `Successfully retrieved unit ${unit.name}`,
+        data: unit,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const unit = await this.unitService.getUnitById(id);
-    return {
-      message: `Successfully retrieved unit ${unit.name}`,
-      data: unit,
-    };
   }
 
   // POST: Create a new unit using Prisma types
@@ -49,14 +53,14 @@ export class UnitController {
   async createUnit(
     @Body() unitData: Omit<Unit, 'id'>,
   ): Promise<Response<Unit>> {
-    try {
+    try{
       const unit = await this.unitService.createUnit(unitData);
       return {
         message: `Unit ${unit.name} successfully added`,
         data: unit,
       };
-    } catch {
-      throw new BadRequestException('Error creating unit');
+    } catch (error) {
+      handlePrismaError(error);
     }
   }
 
@@ -66,26 +70,28 @@ export class UnitController {
     @Param('id') id: string,
     @Body() unitData: Omit<Unit, 'id'>,
   ): Promise<Response<Unit>> {
-    if (!(await this.unitService.checkUnitExists(id))) {
-      throw new NotFoundException(`Unit with ID ${id} not found`);
+    try{
+      const unit = await this.unitService.updateUnit(id, unitData);
+      return {
+        message: `Unit ${unit.name} successfully updated`,
+        data: unit,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const unit = await this.unitService.updateUnit(id, unitData);
-    return {
-      message: `Unit ${unit.name} successfully updated`,
-      data: unit,
-    };
   }
 
   // DELETE: Delete a unit by ID
   @Delete(':id')
   async deleteUnit(@Param('id') id: string): Promise<Response<Unit>> {
-    if (!(await this.unitService.checkUnitExists(id))) {
-      throw new NotFoundException(`Unit with ID ${id} not found`);
+    try{
+      const unit = await this.unitService.deleteUnit(id);
+      return {
+        message: `Unit ${unit.name} successfully deleted`,
+        data: unit,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const unit = await this.unitService.deleteUnit(id);
-    return {
-      message: `Unit ${unit.name} successfully deleted`,
-      data: unit,
-    };
   }
 }

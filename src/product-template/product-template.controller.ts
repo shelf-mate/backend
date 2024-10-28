@@ -13,6 +13,7 @@ import { ProductTemplate } from '@prisma/client';
 import axios from 'axios';
 import { CategoryService } from 'src/category/category.service';
 import * as moment from 'moment';
+import { handlePrismaError } from "../utilities.service";
 
 interface Response<T> {
   message: string;
@@ -38,12 +39,16 @@ export class ProductTemplateController {
   // GET all productTemplates
   @Get()
   async getAllProductTemplates(): Promise<Response<ProductTemplate[]>> {
-    const productTemplates =
-      await this.productTemplateService.getAllProductTemplates();
-    return {
-      message: 'Successfully retrieved all productTemplates',
-      data: productTemplates,
-    };
+    try {
+      const productTemplates =
+        await this.productTemplateService.getAllProductTemplates();
+      return {
+        message: 'Successfully retrieved all productTemplates',
+        data: productTemplates,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
   }
 
   // GET a productTemplate by ID
@@ -51,15 +56,16 @@ export class ProductTemplateController {
   async getProductTemplateById(
     @Param('id') id: string,
   ): Promise<Response<ProductTemplate | null>> {
-    if (!(await this.productTemplateService.checkProductTemplateExists(id))) {
-      throw new NotFoundException(`Product-Template with ID ${id} not found`);
+    try{
+      const productTemplate =
+        await this.productTemplateService.getProductTemplateById(id);
+      return {
+        message: `Successfully retrieved productTemplate ${productTemplate.name}`,
+        data: productTemplate,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const productTemplate =
-      await this.productTemplateService.getProductTemplateById(id);
-    return {
-      message: `Successfully retrieved productTemplate ${productTemplate.name}`,
-      data: productTemplate,
-    };
   }
 
   // GET a productTemplate by EAN, will create the productTemplate if it doesn't exist and incidate that it might be new
@@ -133,6 +139,7 @@ export class ProductTemplateController {
               new: true,
             };
           }
+
         }
         new Error('Error retrieving product from openfoodfacts');
       }
@@ -156,17 +163,21 @@ export class ProductTemplateController {
   async createProductTemplate(
     @Body() productTemplateData: Omit<ProductTemplate, 'id'>,
   ): Promise<Response<ProductTemplate>> {
-    const { categoryId, unitId, ...rest } = productTemplateData;
-    const productTemplate =
-      await this.productTemplateService.createProductTemplate(
-        rest,
-        unitId,
-        categoryId,
-      );
-    return {
-      message: `ProductTemplate ${productTemplate.name} successfully added`,
-      data: productTemplate,
-    };
+    try{
+      const { categoryId, unitId, ...rest } = productTemplateData;
+      const productTemplate =
+        await this.productTemplateService.createProductTemplate(
+          rest,
+          unitId,
+          categoryId,
+        );
+      return {
+        message: `ProductTemplate ${productTemplate.name} successfully added`,
+        data: productTemplate,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
   }
 
   // PATCH: Update a productTemplate by ID
@@ -175,18 +186,19 @@ export class ProductTemplateController {
     @Param('id') id: string,
     @Body() productTemplateData: Partial<Omit<ProductTemplate, 'id'>>,
   ): Promise<Response<ProductTemplate>> {
-    if (!(await this.productTemplateService.checkProductTemplateExists(id))) {
-      throw new NotFoundException(`Product-Template with ID ${id} not found`);
+    try{
+      const productTemplate =
+        await this.productTemplateService.updateProductTemplate(
+          id,
+          productTemplateData,
+        );
+      return {
+        message: `ProductTemplate ${productTemplate.name} successfully updated`,
+        data: productTemplate,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const productTemplate =
-      await this.productTemplateService.updateProductTemplate(
-        id,
-        productTemplateData,
-      );
-    return {
-      message: `ProductTemplate ${productTemplate.name} successfully updated`,
-      data: productTemplate,
-    };
   }
 
   // DELETE: Delete a productTemplate by ID
@@ -194,14 +206,15 @@ export class ProductTemplateController {
   async deleteProductTemplate(
     @Param('id') id: string,
   ): Promise<Response<ProductTemplate>> {
-    if (!(await this.productTemplateService.checkProductTemplateExists(id))) {
-      throw new NotFoundException(`Product-Template with ID ${id} not found`);
+    try{
+      const productTemplate =
+        await this.productTemplateService.deleteProductTemplate(id);
+      return {
+        message: `ProductTemplate ${productTemplate.name} successfully deleted`,
+        data: productTemplate,
+      };
+    } catch (error) {
+      handlePrismaError(error);
     }
-    const productTemplate =
-      await this.productTemplateService.deleteProductTemplate(id);
-    return {
-      message: `ProductTemplate ${productTemplate.name} successfully deleted`,
-      data: productTemplate,
-    };
   }
 }

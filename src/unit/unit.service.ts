@@ -7,11 +7,11 @@ export class UnitService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllUnits() {
-    return this.prisma.unit.findMany();
+    return this.prisma.unit.findMany({});
   }
 
   async getUnitById(id: string) {
-    return this.prisma.unit.findUnique({ where: { id } });
+    return this.prisma.unit.findUnique({where: { id } });
   }
 
   async createUnit(data: Prisma.UnitCreateInput) {
@@ -24,12 +24,5 @@ export class UnitService {
 
   async deleteUnit(id: string) {
     return this.prisma.unit.delete({ where: { id } });
-  }
-
-  async checkUnitExists(id: string): Promise<boolean> {
-    const unit = await this.prisma.unit.findUnique({
-      where: { id },
-    });
-    return !!unit;
   }
 }
