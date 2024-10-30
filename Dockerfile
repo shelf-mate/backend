@@ -3,6 +3,10 @@ FROM node:16-alpine AS builder
 
 WORKDIR /app
 
+RUN useradd -m builder
+USER builder
+
+
 COPY package*.json ./
 RUN npm install
 
