@@ -3,7 +3,7 @@ FROM node:16-alpine AS builder
 
 WORKDIR /app
 
-RUN useradd -m builder
+RUN adduser -D builder
 USER builder
 
 
@@ -21,7 +21,6 @@ WORKDIR /app
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-COPY package*.json ./
 
 EXPOSE 3000
 
