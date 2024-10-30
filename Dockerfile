@@ -1,35 +1,26 @@
-# Stage 1: Build the application
-FROM node:20-alpine AS builder
+# Use the official Node.js image as the base image
+FROM node:20
 
-WORKDIR /app
+# Set the working directory
+WORKDIR /usr/src/app
 
-# Copy package files and install dependencies as root
+# Copy package.json and package-lock.json
 COPY package*.json ./
+COPY package-lock*.json ./
+
+# Install dependencies
 RUN npm install
 
-# Change ownership of node_modules and the app directory
-RUN adduser -D builder && chown -R builder /app/node_modules /app
-
-# Switch to the non-root user and run Prisma generate
-USER builder
-
+# Copy the rest of the application code
 COPY . .
+
 RUN npx prisma generate
+
+# Build the NestJS application
 RUN npm run build
 
-# Stage 2: Run the application
-FROM node:20-alpine
-
-WORKDIR /app
-
-# Copy built application and dependencies from the builder stage
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-
-# Run the final stage as a non-root user for security
-RUN adduser -D appuser
-USER appuser
-
+# Expose the port the app runs on
 EXPOSE 3000
 
+# Command to run the application
 CMD ["node", "dist/main"]
