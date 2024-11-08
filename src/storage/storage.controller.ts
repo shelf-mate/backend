@@ -10,6 +10,7 @@ import {
 import { StorageService } from './storage.service';
 import { Product, Storage } from '@prisma/client';
 import { ProductService } from 'src/product/product.service';
+import { handlePrismaError } from "../utilities.service";
 
 interface Response<T> {
   message: string;
@@ -38,17 +39,14 @@ export class StorageController {
   async getStorageById(
     @Param('id') id: string,
   ): Promise<Response<Storage | null>> {
-    try {
+    try{
       const storage = await this.storageService.getStorageById(id);
       return {
-        message: 'Successfully retrieved storage',
+        message: `Successfully retrieved storage ${storage.name}`,
         data: storage,
       };
-    } catch {
-      return {
-        message: 'Storage not found',
-        data: null,
-      };
+    } catch (error) {
+      handlePrismaError(error);
     }
   }
 
@@ -56,17 +54,16 @@ export class StorageController {
   async getProductsInStorage(
     @Param('id') id: string,
   ): Promise<Response<Product[]>> {
-    try {
-      const products = await this.storageService.getProductsInStorage(id);
+    try{
+      const storage = await this.storageService.getStorageById(id, {
+        products: true,
+      });
       return {
-        message: 'Successfully retrieved products in storage',
-        data: products,
+        message: `Successfully retrieved all products in storage ${storage.name}.`,
+        data: storage.products,
       };
-    } catch {
-      return {
-        message: 'Storage not found',
-        data: null,
-      };
+    } catch (error) {
+      handlePrismaError(error);
     }
   }
   // POST: Create a new storage using Prisma types
@@ -74,11 +71,15 @@ export class StorageController {
   async createStorage(
     @Body() storageData: Omit<Storage, 'id'>,
   ): Promise<Response<Storage>> {
-    const storage = await this.storageService.createStorage(storageData);
-    return {
-      message: 'Storage successfully added',
-      data: storage,
-    };
+    try{
+      const storage = await this.storageService.createStorage(storageData);
+      return {
+        message: `Storage ${storage.name} successfully added`,
+        data: storage,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
   }
 
   // PATCH: Update a storage by ID
@@ -87,27 +88,28 @@ export class StorageController {
     @Param('id') id: string,
     @Body() storageData: Omit<Storage, 'id'>,
   ): Promise<Response<Storage>> {
-    try {
+    try{
       const storage = await this.storageService.updateStorage(id, storageData);
       return {
-        message: 'Storage successfully updated',
+        message: `Storage ${storage.name} successfully updated`,
         data: storage,
       };
-    } catch {
-      return {
-        message: 'Storage not found',
-        data: undefined,
-      };
+    } catch (error) {
+      handlePrismaError(error);
     }
   }
 
   // DELETE: Delete a storage by ID
   @Delete(':id')
   async deleteStorage(@Param('id') id: string): Promise<Response<Storage>> {
-    const storage = await this.storageService.deleteStorage(id);
-    return {
-      message: 'Storage successfully deleted',
-      data: storage,
-    };
+    try{
+      const storage = await this.storageService.deleteStorage(id);
+      return {
+        message: `Storage ${storage.name} successfully deleted`,
+        data: storage,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
   }
 }

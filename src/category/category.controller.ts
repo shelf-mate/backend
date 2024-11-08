@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { Category, Product } from '@prisma/client';
+import { handlePrismaError} from "../utilities.service";
 
 interface Response<T> {
   message: string;
@@ -22,11 +23,15 @@ export class CategoryController {
   // GET all categories
   @Get()
   async getAllCategories(): Promise<Response<Category[]>> {
-    const categories = await this.categoryService.getAllCategories();
-    return {
-      message: 'Successfully retrieved all categories',
-      data: categories,
-    };
+    try{
+      const categories = await this.categoryService.getAllCategories();
+      return {
+        message: 'Successfully retrieved all categories',
+        data: categories,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
   }
 
   // GET a category by ID
@@ -34,17 +39,14 @@ export class CategoryController {
   async getCategoryById(
     @Param('id') id: string,
   ): Promise<Response<Category | null>> {
-    try {
+    try{
       const category = await this.categoryService.getCategoryById(id);
       return {
-        message: 'Successfully retrieved category',
+        message: `Successfully retrieved category ${category.name}`,
         data: category,
       };
-    } catch {
-      return {
-        message: 'Category not found',
-        data: null,
-      };
+    } catch (error) {
+      handlePrismaError(error);
     }
   }
 
@@ -52,22 +54,16 @@ export class CategoryController {
   async getProductsInStorage(
     @Param('id') id: string,
   ): Promise<Response<Product[]>> {
-    try {
+    try{
       const category = await this.categoryService.getCategoryById(id, {
         products: true,
       });
       return {
-        message:
-          'Successfully retrieved al products in category ' +
-          category.name +
-          '-.',
+        message: `Successfully retrieved al products in category ${category.name}`,
         data: category.products,
       };
-    } catch {
-      return {
-        message: 'Storage not found',
-        data: null,
-      };
+    } catch (error) {
+      handlePrismaError(error);
     }
   }
 
@@ -76,11 +72,15 @@ export class CategoryController {
   async createCategory(
     @Body() categoryData: Omit<Category, 'id'>,
   ): Promise<Response<Category>> {
-    const category = await this.categoryService.createCategory(categoryData);
-    return {
-      message: 'Category successfully added',
-      data: category,
-    };
+    try{
+      const category = await this.categoryService.createCategory(categoryData);
+      return {
+        message: `Category ${category.name} successfully added`,
+        data: category,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
   }
 
   // PATCH: Update a category by ID
@@ -89,30 +89,32 @@ export class CategoryController {
     @Param('id') id: string,
     @Body() categoryData: Omit<Category, 'id'>,
   ): Promise<Response<Category>> {
-    try {
+    try{
       const category = await this.categoryService.updateCategory(
         id,
         categoryData,
       );
       return {
-        message: 'Category successfully updated',
+        message: `Category ${category.name} successfully updated`,
         data: category,
       };
-    } catch {
-      return {
-        message: 'Category not found',
-        data: undefined,
-      };
+    } catch (error) {
+      handlePrismaError(error);
     }
   }
 
   // DELETE: Delete a category by ID
   @Delete(':id')
   async deleteCategory(@Param('id') id: string): Promise<Response<Category>> {
-    const category = await this.categoryService.deleteCategory(id);
-    return {
-      message: 'Category successfully deleted',
-      data: category,
-    };
+    try{
+      const category = await this.categoryService.deleteCategory(id);
+      return {
+        message: `Category ${category.name} successfully deleted`,
+        data: category,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
+
   }
 }

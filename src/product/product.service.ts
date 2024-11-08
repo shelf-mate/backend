@@ -6,26 +6,32 @@ import { Prisma } from '@prisma/client';
 export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllProducts() {
-    return this.prisma.product.findMany({
-      include: {
-        category: true,
-        unit: true,
-        storage: true,
-      },
-    });
+
+  async getAllProducts(include: {category: boolean, unit: boolean, storage: boolean} = {
+    category: true,
+    storage: true,
+    unit: true
+  }) {
+    return this.prisma.product.findMany({ include });
   }
 
-  async getProductById(id: string) {
-    return this.prisma.product.findUnique({
-      include: {
-        category: true,
-        unit: true,
-        storage: true,
-      },
-      where: { id },
-    });
+  async getProductById(id: string, include: {category: boolean, unit: boolean, storage: boolean} = {
+    category: true,
+    storage: true,
+    unit: true
+  }) {
+    return this.prisma.product.findUnique({ include, where: { id }});
   }
+
+  async getProductByUnit(unit: string, include: {category: boolean, unit: boolean, storage: boolean} = {
+    category: true,
+    storage: true,
+    unit: true
+  }) {
+    // @ts-ignore
+    return this.prisma.product.findUnique({ include, where: { unit }});
+  }
+
 
   async createProduct(
     data: Omit<Prisma.ProductCreateInput, 'category' | 'storage' | 'unit'>,
@@ -49,26 +55,20 @@ export class ProductService {
     });
   }
 
-  async updateProduct(id: string, data: Prisma.ProductUpdateInput) {
-    return this.prisma.product.update({
-      include: {
-        category: true,
-        unit: true,
-        storage: true,
-      },
-      where: { id },
-      data,
-    });
+
+  async updateProduct(id: string, data: Prisma.ProductUpdateInput, include: {category: boolean, unit: boolean, storage: boolean} = {
+    category: true,
+    storage: true,
+    unit: true
+  }) {
+    return this.prisma.product.update({ include, where: { id }, data});
   }
 
-  async deleteProduct(id: string) {
-    return this.prisma.product.delete({
-      include: {
-        category: true,
-        unit: true,
-        storage: true,
-      },
-      where: { id },
-    });
+  async deleteProduct(id: string, include: {category: boolean, unit: boolean, storage: boolean} = {
+    category: true,
+    storage: true,
+    unit: true
+  }) {
+    return this.prisma.product.delete({ include, where: { id }});
   }
 }

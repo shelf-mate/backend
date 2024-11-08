@@ -7,11 +7,11 @@ export class UnitService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllUnits() {
-    return this.prisma.unit.findMany();
+    return this.prisma.unit.findMany({});
   }
 
   async getUnitById(id: string) {
-    return this.prisma.unit.findUnique({ where: { id } });
+    return this.prisma.unit.findUnique({where: { id } });
   }
 
   async createUnit(data: Prisma.UnitCreateInput) {
