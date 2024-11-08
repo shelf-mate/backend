@@ -51,6 +51,22 @@ export class ProductController {
     }
   }
 
+  // GET a product by ID
+  @Get(':id')
+  async getProductByUnit(
+    @Param('unit') unit: string,
+  ): Promise<Response<Product | null>> {
+    try{
+      const product = await this.productService.getProductByUnit(unit);
+      return {
+        message: `Successfully retrieved product ${product.name}`,
+        data: product,
+      };
+    } catch (error) {
+      handlePrismaError(error);
+    }
+  }
+
   // POST: Create a new product using Prisma types
   @Post()
   async createProduct(

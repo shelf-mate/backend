@@ -22,6 +22,16 @@ export class ProductService {
     return this.prisma.product.findUnique({ include, where: { id }});
   }
 
+  async getProductByUnit(unit: string, include: {category: boolean, unit: boolean, storage: boolean} = {
+    category: true,
+    storage: true,
+    unit: true
+  }) {
+    // @ts-ignore
+    return this.prisma.product.findUnique({ include, where: { unit }});
+  }
+
+
   async createProduct(
     data: Omit<Prisma.ProductCreateInput, 'category' | 'storage' | 'unit'>,
     unitId: string,
