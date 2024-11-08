@@ -51,7 +51,7 @@ export class ProductController {
     }
   }
 
-  // GET a product by ID
+  // GET a product by Unit
   @Get(':id')
   async getProductByUnit(
     @Param('unit') unit: string,

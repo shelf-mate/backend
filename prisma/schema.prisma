@@ -14,6 +14,7 @@ model ProductTemplate {
   id             String  @id @default(uuid()) @map("_id")
   ean            String?
   name           String?
+  quantity       Int     @default(1)
   expirationTime Int?
 
   createdAt DateTime @default(now())
