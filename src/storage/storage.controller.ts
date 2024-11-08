@@ -66,7 +66,6 @@ export class StorageController {
       handlePrismaError(error);
     }
   }
-
   // POST: Create a new storage using Prisma types
   @Post()
   async createStorage(

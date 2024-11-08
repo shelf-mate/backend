@@ -6,6 +6,7 @@ import { Prisma } from '@prisma/client';
 export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
+
   async getAllProducts(include: {category: boolean, unit: boolean, storage: boolean} = {
     category: true,
     storage: true,
@@ -53,6 +54,7 @@ export class ProductService {
       include,
     });
   }
+
 
   async updateProduct(id: string, data: Prisma.ProductUpdateInput, include: {category: boolean, unit: boolean, storage: boolean} = {
     category: true,
