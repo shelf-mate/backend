@@ -7,18 +7,14 @@ export class CategoryService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getAllCategories() {
-    return this.prisma.product.findMany({
-      include: {
-        storage: true,
-      }
-    });
+    return this.prisma.category.findMany({});
   }
 
   async getCategoryById(
     id: string,
     include: { products: boolean } = { products: false },
   ) {
-    return this.prisma.category.findUnique( {include, where: { id } });
+    return this.prisma.category.findUnique({ include, where: { id } });
   }
 
   async createCategory(data: Prisma.CategoryCreateInput) {
